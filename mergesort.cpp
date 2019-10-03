@@ -64,7 +64,8 @@ void mergesort(int* a, int* tmp, int n)
         mergesort(a + mid, tmp + mid, n - mid);
 
         // merge left and right into tmp and copy back into a (using STL)
-        merge(a, a+mid, a+mid, a+n, tmp);
+        // merge(a, a+mid, a+mid, a+n, tmp);
+        recmerge(a, mid, a+mid, n-mid, tmp);
         copy(tmp,tmp+n,a);
     }
 }
@@ -92,4 +93,24 @@ int medianofunion(int *a, int n, int *b, int m) {
             else return max(a[i - 1], b[j - 1]);
         }
     }
+}
+
+void recmerge(int* a, int n, int* b, int m, int* tmp) {
+    if(n==0){
+        copy(b,b+m,tmp);
+        return;
+    }
+    if(m==0){
+        copy(a,a+n,tmp);
+        return;
+    }
+
+    cout << n << " " << m << endl;
+    
+    int Ms = medianofunion(a, n, b, m);
+    int i = (int)(lower_bound(a, a+n, Ms) - a);
+    int j = (int)(lower_bound(b, b+m, Ms) - b);
+    recmerge(a, i, b, j, tmp);
+    recmerge(a+i, n-i, b+j, m-j, tmp+i+j);
+    
 }
