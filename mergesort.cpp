@@ -33,7 +33,13 @@ int main(int argc, char** argv) {
 
     // sort array using mergesort (and time it)
     double start_mergeSort = omp_get_wtime();
-    mergesort(v, t, length);
+    #pragma omp parallel shared(v,t)
+    {
+      #pragma omp single nowait
+      {
+        mergesort(v, t, length);
+      }
+    }
     double elapsed_mergeSort = omp_get_wtime() - start_mergeSort;
 
     // sort array using STL (and time it)
@@ -50,7 +56,7 @@ int main(int argc, char** argv) {
 
     delete [] v2;
     delete [] t;
-    delete [] v;
+delete [] v;
 
 }
 
@@ -60,8 +66,10 @@ void mergesort(int* a, int* tmp, int n)
     if( n > 1 ) {
         // sort left and right recursively
         int mid = n / 2;
+        #pragma omp task shared(a,tmp)
         mergesort(a, tmp, mid);
         mergesort(a + mid, tmp + mid, n - mid);
+        #pragma omp taskwait
 
         // merge left and right into tmp and copy back into a (using STL)
         merge(a, a+mid, a+mid, a+n, tmp);
