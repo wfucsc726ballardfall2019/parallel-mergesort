@@ -57,7 +57,10 @@ int main(int argc, char** argv) {
 // sorts array a of length n, tmp is workspace of length n
 void mergesort(int* a, int* tmp, int n)
 {
-    if( n > 1 ) {
+    if(n <= 10) {
+        sort(a, a+n);
+    }
+    else {
         // sort left and right recursively
         int mid = n / 2;
         mergesort(a, tmp, mid);
