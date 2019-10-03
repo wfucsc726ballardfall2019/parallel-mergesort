@@ -112,7 +112,6 @@ void recmerge(int* a, int n, int* b, int m, int* tmp) {
         merge(a, a+n, b, b+m, tmp);
     }
 
-    cout << n << " " << m << endl;
     
     int Ms = medianofunion(a, n, b, m);
     int i = (int)(lower_bound(a, a+n, Ms) - a);
