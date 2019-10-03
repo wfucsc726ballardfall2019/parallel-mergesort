@@ -77,7 +77,11 @@ void mergesort(int* a, int* tmp, int n)
         // merge left and right into tmp and copy back into a (using STL)
         // merge(a, a+mid, a+mid, a+n, tmp);
         recmerge(a, mid, a+mid, n-mid, tmp);
-        copy(tmp,tmp+n,a);
+        //copy(tmp,tmp+n,a);
+        #pragma omp parallel for shared(a,tmp)
+        for(int i = 0; i < n; i++) {
+            a[i] = tmp[i];
+        }
     }
 }
     
@@ -121,7 +125,10 @@ void recmerge(int* a, int n, int* b, int m, int* tmp) {
     int Ms = medianofunion(a, n, b, m);
     int i = (int)(lower_bound(a, a+n, Ms) - a);
     int j = (int)(lower_bound(b, b+m, Ms) - b);
+
+    #pragma omp task shared(a,b,tmp)
     recmerge(a, i, b, j, tmp);
     recmerge(a+i, n-i, b+j, m-j, tmp+i+j);
+    #pragma omp taskwait
     
 }
