@@ -63,7 +63,7 @@ delete [] v;
 // sorts array a of length n, tmp is workspace of length n
 void mergesort(int* a, int* tmp, int n)
 {
-    if(n <= 10) {
+    if(n <= 1000) {
         sort(a, a+n);
     }
     else {
