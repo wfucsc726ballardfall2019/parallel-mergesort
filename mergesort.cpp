@@ -6,20 +6,21 @@
 #include <omp.h>
 using namespace std;
 
-void mergesort(int* a, int* tmp, int n);
+void mergesort(int* a, int* tmp, int n, int bc);
 int medianofunion(int* a, int n, int* b, int m);
-void recmerge(int* a, int n, int* b, int m, int* tmp);
+void recmerge(int* a, int n, int* b, int m, int* tmp, int bc);
 
 int main(int argc, char** argv) {
 
     // read inputs
-    if(argc != 4) {
-        cout << "Usage: ./a.out seed length nthreads" << endl;
+    if(argc != 5) {
+        cout << "Usage: ./a.out seed length basecase nthreads" << endl;
         return 1;
     }
     srand(atoi(argv[1]));
     int length = atoi(argv[2]);
-    omp_set_num_threads(atoi(argv[3]));
+    int bc = atoi(argv[3]);
+    omp_set_num_threads(atoi(argv[4]));
 
     // allocate memory
     int* v = new int[length]; // array to be sorted
@@ -37,7 +38,7 @@ int main(int argc, char** argv) {
     {
       #pragma omp single nowait
       {
-        mergesort(v, t, length);
+        mergesort(v, t, length, bc);
       }
     }
     double elapsed_mergeSort = omp_get_wtime() - start_mergeSort;
@@ -61,22 +62,22 @@ delete [] v;
 }
 
 // sorts array a of length n, tmp is workspace of length n
-void mergesort(int* a, int* tmp, int n)
+void mergesort(int* a, int* tmp, int n, int bc)
 {
-    if(n <= 1000) {
+    if(n <= bc) {
         sort(a, a+n);
     }
     else {
         // sort left and right recursively
         int mid = n / 2;
         #pragma omp task shared(a,tmp)
-        mergesort(a, tmp, mid);
-        mergesort(a + mid, tmp + mid, n - mid);
+        mergesort(a, tmp, mid, bc);
+        mergesort(a + mid, tmp + mid, n - mid, bc);
         #pragma omp taskwait
 
         // merge left and right into tmp and copy back into a (using STL)
-        // merge(a, a+mid, a+mid, a+n, tmp);
-        recmerge(a, mid, a+mid, n-mid, tmp);
+        //merge(a, a+mid, a+mid, a+n, tmp);
+        recmerge(a, mid, a+mid, n-mid, tmp, bc);
         //copy(tmp,tmp+n,a);
         #pragma omp parallel for shared(a,tmp)
         for(int i = 0; i < n; i++) {
@@ -110,9 +111,9 @@ int medianofunion(int *a, int n, int *b, int m) {
     }
 }
 
-void recmerge(int* a, int n, int* b, int m, int* tmp) {
+void recmerge(int* a, int n, int* b, int m, int* tmp, int bc) {
 
-    if(n+m<=1000){
+    if(n+m<=bc){
         merge(a, a+n, b, b+m, tmp);
         return;
     }
@@ -124,8 +125,8 @@ void recmerge(int* a, int n, int* b, int m, int* tmp) {
     //cout << "i " << i << "j " << j << "Ms " << j << endl;
 
     #pragma omp task shared(a,b,tmp)
-    recmerge(a, i, b, j, tmp);
-    recmerge(a+i, n-i, b+j, m-j, tmp+i+j);
+    recmerge(a, i, b, j, tmp, bc);
+    recmerge(a+i, n-i, b+j, m-j, tmp+i+j, bc);
     #pragma omp taskwait
     
 }
