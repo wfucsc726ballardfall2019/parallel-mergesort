@@ -107,13 +107,9 @@ int medianofunion(int *a, int n, int *b, int m) {
 }
 
 void recmerge(int* a, int n, int* b, int m, int* tmp) {
-    if(n==0){
-        copy(b,b+m,tmp);
-        return;
-    }
-    if(m==0){
-        copy(a,a+n,tmp);
-        return;
+
+    if(n+m<=10){
+        merge(a, a+n, b, b+m, tmp);
     }
 
     cout << n << " " << m << endl;
